@@ -80,9 +80,6 @@ def load_databases():
 # Initialize retrievers
 external_retriever, internal_retriever, ext_count, int_count = load_databases()
 
-# Initialize retrievers
-external_retriever, internal_retriever, ext_count, int_count = initialize_retrievers()
-
 with st.sidebar:
     st.subheader("Database Overview")
     st.write(f"**External ERIC Chunks:** {ext_count}")

@@ -169,13 +169,6 @@ if st.button("Synthesize Evidence", type="primary"):
             # 1. Intercept the context before sending it to the AI
             raw_context = retrieve_from_both(user_question)
             
-            # 2. Force it to display on the screen
-            with st.expander("🔍 DIAGNOSTIC: What data is being sent to the AI?"):
-                if not raw_context.strip():
-                    st.error("🚨 FAILURE: Chroma searched the database but returned 0 chunks. The database is empty, corrupted, or unreadable by this server.")
-                else:
-                    st.success("✅ SUCCESS: Chunks were retrieved! If the AI still refuses to answer, the LLM is malfunctioning.")
-                    st.text(raw_context)
 
             # 3. Run the standard generation chain
             max_retries = 4

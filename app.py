@@ -26,11 +26,18 @@ st.markdown("""
         font-size: 15px;
         padding: 24px;
         background-color: #f9f9f9;
+        color: #1a1a1a; /* Forces text to be dark grey */
         border-left: 5px solid #4A90D9;
         border-radius: 6px;
         margin-top: 20px;
     }
-    h2 { color: #2E7D32; margin-top: 20px; }
+    .output-container h2 { 
+        color: #2E7D32 !important; 
+        margin-top: 20px; 
+    }
+    .output-container p, .output-container li {
+        color: #1a1a1a !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 

@@ -237,7 +237,7 @@ rag_chain = (
 )
 
 # 6. Streamlit User Interface
-default_question = "How do I improve vocabularies for k-5 students?"
+default_question = "How does pre-teaching vocabulary impact reading comprehension for elementary students, particularly for struggling readers?"
 user_question = st.text_area("Enter your research question:", value=default_question, height=100)
 
 if st.button("Synthesize Evidence", type="primary"):

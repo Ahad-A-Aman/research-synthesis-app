@@ -62,13 +62,13 @@ def load_databases():
     external_vectorstore = Chroma(
         collection_name="external_eric",
         embedding_function=embeddings,
-        persist_directory="./chroma_db"
+        persist_directory="./chroma_db_backup"
     )
     
     internal_vectorstore = Chroma(
         collection_name="internal_fieldwork",
         embedding_function=embeddings,
-        persist_directory="./chroma_db"
+        persist_directory="./chroma_db_backup"
     )
 
     ext_retriever = external_vectorstore.as_retriever(search_kwargs={"k": 5})

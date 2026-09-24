@@ -171,7 +171,7 @@ if st.button("Synthesize Evidence", type="primary"):
                 try:
                     response = rag_chain.invoke(user_question)
                     response = response.replace("## External Research Findings", "## External Research Findings\n\n")
-                    st.markdown(f'<div class="output-container">{response}</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="output-container">\n\n{response}\n\n</div>', unsafe_allow_html=True)
                     break
                 
                 except Exception as e:

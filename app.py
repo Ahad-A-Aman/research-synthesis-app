@@ -164,23 +164,33 @@ user_question = st.text_area("Enter your research question:", value=default_ques
 if st.button("Synthesize Evidence", type="primary"):
     if user_question.strip():
         with st.spinner("Synthesizing external research and internal observations..."):
+            
+            # 1. Intercept the context before sending it to the AI
+            raw_context = retrieve_from_both(user_question)
+            
+            # 2. Force it to display on the screen
+            with st.expander("🔍 DIAGNOSTIC: What data is being sent to the AI?"):
+                if not raw_context.strip():
+                    st.error("🚨 FAILURE: Chroma searched the database but returned 0 chunks. The database is empty, corrupted, or unreadable by this server.")
+                else:
+                    st.success("✅ SUCCESS: Chunks were retrieved! If the AI still refuses to answer, the LLM is malfunctioning.")
+                    st.text(raw_context)
+
+            # 3. Run the standard generation chain
             max_retries = 4
             for attempt in range(max_retries):
                 try:
                     response = rag_chain.invoke(user_question)
-
-                    # Force a double line break after the header to guarantee CSS rendering
                     response = response.replace("## External Research Findings", "## External Research Findings\n\n")
-
                     st.markdown(f'<div class="output-container">{response}</div>', unsafe_allow_html=True)
-                    break  # Stop the loop immediately if it succeeds
-
+                    break
+                
                 except Exception as e:
                     if attempt < max_retries - 1:
-                        # Show a small pop-up in the bottom right corner notifying the user of the retry
-                        st.toast(f"API hiccup (Attempt {attempt + 1}). Retrying automatically...")
+                        st.toast(f"API hiccup (Attempt {attempt + 1}). Retrying...")
+                        import time
                         time.sleep(2)
                     else:
-                        st.error(f"Error during chain execution after {max_retries} attempts: {e}")
+                        st.error(f"Error during chain execution: {e}")
     else:
         st.warning("Please enter a research question before executing.")

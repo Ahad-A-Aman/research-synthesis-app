@@ -52,110 +52,33 @@ else:
     st.stop()
 
 # Cache the vector store setup so it only runs once per app instance
-@st.cache_resource(show_spinner="Building vector databases from ERIC API and internal fieldwork...")
-def initialize_retrievers():
-    # 1. Fetch external ERIC documents across all 10 research queries
-    def fetch_eric_docs(query, num_results=10):
-        url = "https://api.ies.ed.gov/eric/"
-        params = {
-            "search": query,
-            "format": "json",
-            "rows": num_results,
-            "fq": "peerreviewed:T"
-        }
-        try:
-            response = requests.get(url, params=params, timeout=15)
-            data = response.json()
-        except Exception:
-            return []
-
-        documents = []
-        for item in data.get("response", {}).get("docs", []):
-            if not item.get("description"):
-                continue
-            content = f"Title: {item.get('title', 'N/A')}\n\nAbstract: {item.get('description', '')}"
-            eric_id = item.get("id", "")
-            eric_url = f"https://eric.ed.gov/?id={eric_id}" if eric_id else "ERIC database"
-            peer = "Yes" if item.get("peerreviewed") == "T" else "No"
-            
-            metadata = {
-                "source": eric_url,
-                "source_type": "external",
-                "title": item.get("title", "N/A"),
-                "author": str(item.get("author", "N/A")),
-                "year": str(item.get("publicationdateyear", "N/A")),
-                "peer_reviewed": peer
-            }
-            documents.append(Document(page_content=content, metadata=metadata))
-        return documents
-
-    queries = [
-        "reading comprehension K-5 elementary",
-        "literacy instruction early childhood",
-        "phonics decoding elementary students",
-        "teacher interview classroom observation",
-        "math instruction elementary school",
-        "science instruction K-5 students",
-        "student engagement classroom learning",
-        "formative assessment elementary education",
-        "vocabulary development early grades",
-        "writing instruction primary school"
-    ]
-
-    all_docs = []
-    for query in queries:
-        all_docs.extend(fetch_eric_docs(query, num_results=10))
-
-    # Deduplicate ERIC documents by title
-    seen_titles = set()
-    eric_docs = []
-    for doc in all_docs:
-        if doc.metadata["title"] not in seen_titles:
-            seen_titles.add(doc.metadata["title"])
-            eric_docs.append(doc)
-
-    # 2. Load internal fieldwork documents
-    internal_file_path = "internal_fieldwork.txt"
-    if not os.path.exists(internal_file_path):
-        st.error(f"Required file '{internal_file_path}' was not found in the repository root.")
-        st.stop()
-
-    loader = TextLoader(internal_file_path, encoding='utf-8')
-    internal_docs = loader.load()
-    for doc in internal_docs:
-        doc.metadata["source_type"] = "internal"
-        doc.metadata["source"] = "internal_fieldwork.txt"
-        doc.metadata["title"] = "Faculty Fieldwork - Classroom Observations, Interviews and Survey"
-        doc.metadata["author"] = "Research Team"
-        doc.metadata["year"] = "2024"
-
-    # 3. Split documents into chunks
-    docs = eric_docs + internal_docs
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    splits = text_splitter.split_documents(docs)
-
-    external_splits = [s for s in splits if s.metadata.get("source_type") == "external"]
-    internal_splits = [s for s in splits if s.metadata.get("source_type") == "internal"]
-
-    # 4. Generate embeddings and initialize vector stores
+@st.cache_resource(show_spinner="Loading pre-built vector databases...")
+def load_databases():
+    from langchain_community.embeddings import HuggingFaceEmbeddings
+    from langchain_chroma import Chroma
+    
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     
-    external_vectorstore = Chroma.from_documents(
-        documents=external_splits,
-        embedding=embeddings,
-        collection_name="external_eric"
+    external_vectorstore = Chroma(
+        collection_name="external_eric",
+        embedding_function=embeddings,
+        persist_directory="./chroma_db"
     )
     
-    internal_vectorstore = Chroma.from_documents(
-        documents=internal_splits,
-        embedding=embeddings,
-        collection_name="internal_fieldwork"
+    internal_vectorstore = Chroma(
+        collection_name="internal_fieldwork",
+        embedding_function=embeddings,
+        persist_directory="./chroma_db"
     )
 
     ext_retriever = external_vectorstore.as_retriever(search_kwargs={"k": 5})
     int_retriever = internal_vectorstore.as_retriever(search_kwargs={"k": 3})
 
-    return ext_retriever, int_retriever, len(external_splits), len(internal_splits)
+    # Hardcoding the chunk counts based on your Colab output to keep the sidebar UI working
+    return ext_retriever, int_retriever, 281, 39
+
+# Initialize retrievers
+external_retriever, internal_retriever, ext_count, int_count = load_databases()
 
 # Initialize retrievers
 external_retriever, internal_retriever, ext_count, int_count = initialize_retrievers()

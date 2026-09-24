@@ -95,7 +95,12 @@ def format_docs(docs):
     for doc in docs:
         source_type = doc.metadata.get("source_type", "unknown").upper()
         title = doc.metadata.get("title", "Unknown")
-        formatted.append(f"[{source_type} SOURCE]\nTitle: {title}\nContent: {doc.page_content}")
+        author = doc.metadata.get("author", "Unknown Author")
+        year = doc.metadata.get("year", "Unknown Year")
+        
+        # Now the AI will receive the exact author and year alongside the text
+        formatted.append(f"[{source_type} SOURCE]\nTitle: {title}\nAuthor: {author}\nYear: {year}\nContent: {doc.page_content}")
+    
     return "\n\n--\n\n".join(formatted)
 
 def retrieve_from_both(question):
@@ -109,25 +114,32 @@ Your job is to synthesize findings by combining two distinct types of sources:
 2. INTERNAL SOURCES: The faculty team's own fieldwork including observations, interviews, and surveys
 
 STRICT RULES YOU MUST FOLLOW:
-1. ONLY use information explicitly present in the context below. 
+1. ONLY use information explicitly present in the context below. Do not hallucinate or use outside knowledge.
 2. ALWAYS clearly distinguish between external research findings and internal fieldwork findings.
-3. Synthesize whatever relevant information is available in the context, even if it only partially answers the question (e.g., if the question asks about a specific method, but the text discusses general instruction). 
+3. Synthesize whatever relevant information is available in the context, even if it only partially answers the question.
 4. If the context is 100% unrelated to the question, respond ONLY with: "The provided documents do not contain enough information to answer this question."
-5. ALWAYS cite the exact source title, author and year for external sources.
-6. ALWAYS label internal sources clearly as "Internal Fieldwork".
-7. Format your response EXACTLY using the following markdown structure. You MUST place a blank line after every heading:
+5. Format your response EXACTLY using the following markdown structure. You MUST place a blank line after every heading:
 
 ## External Research Findings
 
-[Summarize relevant peer-reviewed ERIC research here on a new line. If none is relevant, write: "No external ERIC research was retrieved for this topic."]
+[Summarize relevant peer-reviewed ERIC research here. If none is relevant, write: "No external ERIC research was retrieved for this topic."]
 
 ## Internal Fieldwork Findings
 
-[Summarize relevant classroom observations, teacher interviews, and survey data here on a new line. If none is relevant, write: "No internal fieldwork documents were retrieved for this topic."]
+[Summarize relevant classroom observations, teacher interviews, and survey data here. If none is relevant, write: "No internal fieldwork documents were retrieved for this topic."]
 
 ## Synthesis: How They Compare
 
-[If BOTH sources are present, explain how they align, complement, or contrast here on a new line. If only one source type is present, omit this section.]
+[If BOTH sources are present, explain how they align, complement, or contrast. If only one source type is present, omit this section.]
+
+## Sources Used
+
+[You MUST list all sources referenced in your synthesis here. Do not hallucinate sources. Use the exact metadata provided in the context.]
+**External Sources:**
+- **[Title]** by [Author] ([Year])
+
+**Internal Sources:**
+- **Internal Fieldwork**: [Brief description of the specific observation, interview, or survey cited]
 
 CONTEXT:
 {context}

@@ -194,13 +194,19 @@ STRICT RULES YOU MUST FOLLOW:
 4. NEVER speculate or generate information beyond what is directly stated in the context.
 5. ALWAYS cite the exact source title, author and year for external sources.
 6. ALWAYS label internal sources clearly as "Internal Fieldwork" followed by the observation or interview reference.
-7. Format your response EXACTLY using the following markdown structure:
+7. Format your response EXACTLY using the following markdown structure. You MUST place a blank line after every heading:
+
 ## External Research Findings
-Write a clear paragraph summarizing what peer-reviewed ERIC research says.
+
+[Write a clear paragraph summarizing what peer-reviewed ERIC research says here on a new line.]
+
 ## Internal Fieldwork Findings
-Write a clear paragraph summarizing what classroom observations, teacher interviews, and survey data show.
+
+[Write a clear paragraph summarizing what classroom observations, teacher interviews, and survey data show here on a new line.]
+
 ## Synthesis: How They Compare
-Write a clear paragraph explaining how the two sources align, complement, or contrast each other.
+
+[Write a clear paragraph explaining how the two sources align, complement, or contrast each other here on a new line.]
 
 FORMATTING RULES:
 If you find BOTH External and Internal sources, provide a Synthesis paragraph explaining how they compare.

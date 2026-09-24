@@ -184,7 +184,13 @@ if st.button("Synthesize Evidence", type="primary"):
                     response = rag_chain.invoke(user_question)
                     response = response.replace("## External Research Findings", "## External Research Findings\n\n")
                     st.markdown(f'<div class="output-container">\n\n{response}\n\n</div>', unsafe_allow_html=True)
-                    break
+                    
+                    # Add this verification block immediately after the response
+                    with st.expander("📚 Verify Sources (View Raw Data)"):
+                        st.info("Cross-check the AI's citations against the exact documents retrieved from the database below.")
+                        st.text(raw_context)
+                        
+                    break  # Stop the loop immediately if it succeeds
                 
                 except Exception as e:
                     if attempt < max_retries - 1:

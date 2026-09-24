@@ -1,5 +1,6 @@
 import os
 import requests
+import time
 import streamlit as st
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import TextLoader
@@ -163,10 +164,23 @@ user_question = st.text_area("Enter your research question:", value=default_ques
 if st.button("Synthesize Evidence", type="primary"):
     if user_question.strip():
         with st.spinner("Synthesizing external research and internal observations..."):
-            try:
-                response = rag_chain.invoke(user_question)
-                st.markdown(f'<div class="output-container">{response}</div>', unsafe_allow_html=True)
-            except Exception as e:
-                st.error(f"Error during chain execution: {e}")
+            max_retries = 4
+            for attempt in range(max_retries):
+                try:
+                    response = rag_chain.invoke(user_question)
+
+                    # Force a double line break after the header to guarantee CSS rendering
+                    response = response.replace("## External Research Findings", "## External Research Findings\n\n")
+
+                    st.markdown(f'<div class="output-container">{response}</div>', unsafe_allow_html=True)
+                    break  # Stop the loop immediately if it succeeds
+
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        # Show a small pop-up in the bottom right corner notifying the user of the retry
+                        st.toast(f"API hiccup (Attempt {attempt + 1}). Retrying automatically...")
+                        time.sleep(2)
+                    else:
+                        st.error(f"Error during chain execution after {max_retries} attempts: {e}")
     else:
         st.warning("Please enter a research question before executing.")
